@@ -3,7 +3,7 @@ import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
 import Persons from './components/Persons'
 
-import axios from 'axios'
+import noteService from '../services/notes'
 
 const App = () => {
   const [persons, setPersons] = useState([]) 
@@ -12,13 +12,10 @@ const App = () => {
   const [search, setSearch] = useState('')
 
   useEffect(() => {
-    console.log('effect')
-    axios
-      .get('http://localhost:3001/persons')
-      .then(response => {
-        console.log('promise fulfilled')
-        setPersons(response.data)
-      })
+    console.log('getting all notes...')
+    noteService
+      .getAll()
+      .then(data => setPersons(data))
   }, [])
   console.log('render', persons.length, 'persons')
 
@@ -40,12 +37,11 @@ const App = () => {
 
   const addNames = (event) => {
     event.preventDefault()
-    console.log("new name added", newName)
+    console.log("adding new names & numbers...", newName)
 
     const person = {
                     name: newName,
                     number: newNumber,
-                    id: persons.length
                   }
     
     const onlyName = persons.map(person => person.name)
@@ -54,14 +50,46 @@ const App = () => {
 
     if (onlyName.indexOf(newName) === -1) {
       // does not exist, safe to add
-      setPersons(persons.concat(person))
+      
+      noteService
+        .create(person)
+        .then(data => {
+          console.log(data)
+          setPersons(persons.concat(data))
+        })
     } else {
-      // exists, shows alert
-      alert(`${newName} in the phonebook liao!`)
+      // exists, shows confirmation if want to update or not
+      confirm(`${person.name} is alr in the phone book liao, replace old number with new one?`)
+
+      console.log('updating person...')
+
+      const oldPerson = persons.find(person => person.name === newName)
+      const changedPerson = {...oldPerson, number: newNumber}
+
+      noteService
+        .updatePerson(changedPerson.id, changedPerson)
+        .then(response => {
+          setPersons(persons.map(person => person.name === newName ? response : person))
+        })
+
     }
 
     setNewName('')
     setNewNumber('')
+  }
+
+  const handlePersonDelete = id => {
+    const filtered = persons.filter(person => person.id === id)
+    console.log(filtered)
+    confirm(`You damn sure you wanna delete this guy: ${persons.filter(person => person.id === id)[0].name}`)
+
+    console.log('deleting person...')
+
+    noteService
+      .deletePerson(id)
+      .then(() => {
+        setPersons(persons.filter(person => person.id !== id))
+      })
   }
 
   return (
@@ -77,7 +105,7 @@ const App = () => {
 
       <h2>Numbers</h2>
 
-      <Persons persons={persons} search={search} />
+      <Persons persons={persons} search={search} onDelete={handlePersonDelete} />
 
       ...
     </div>
