@@ -21,15 +21,14 @@ const CountryInfo = ({ country }) => {
 }
 
 const FilterCountries = (props) => {
-  const filtered = props.countries.filter(country => country.name.common.toLowerCase().includes(props.search))
 
-  if (filtered.length == 1) {
+  if (props.filtered.length == 1) {
     return (
       <div>
-        <CountryInfo country={filtered[0]} />
+        <CountryInfo country={props.filtered[0]} />
       </div>
     )
-  } else if (filtered.length > 10) {
+  } else if (props.filtered.length > 10) {
     return (
       <div>Too many matches, specify another filter</div>
     )
@@ -37,7 +36,7 @@ const FilterCountries = (props) => {
       return ( 
         <div>
             {
-              filtered.map(country => <li id={country.name.common}>{country.name.common} <button onClick={() => props.onShow(country)}>show</button></li>)
+              props.filtered.map(country => <li key={country.name.common}>{country.name.common} <button onClick={() => props.onShow(country.name.common)}>show</button></li>)
             }
         </div>
 )
@@ -47,7 +46,6 @@ const FilterCountries = (props) => {
 function App() {
   const [value, setValue] = useState('')
   const [allCountries, setAllCountries] = useState([])
-  const [countryDisplayed, setCountryDisplayed] = useState([])
 
   useEffect(() => {
     console.log('effect run, country is now')
@@ -57,7 +55,7 @@ function App() {
       .get(`https://studies.cs.helsinki.fi/restcountries/api/all`)
       .then(response => {
         console.log(response.data)
-        setAllCountries(response.data.map(country => { country... , visibility: false }))
+        setAllCountries(response.data)
       })
   }, [])
 
@@ -65,15 +63,7 @@ function App() {
     setValue(event.target.value)
   }
 
-  const onShow = (country) => {
-    console.log(country)
-    console.log(`showing info of ${country.name.common}`)
-    return (
-      <div>
-        <CountryInfo country={country} />
-      </div>
-    )
-  }
+  const filtered = allCountries.filter(country => country.name.common.toLowerCase().includes(value.toLowerCase()))
 
   return (
     <div>
@@ -81,7 +71,7 @@ function App() {
         find countries <input value={value} onChange={handleChange} />
       </form>
 
-      <FilterCountries search={value} countries={allCountries} onShow={onShow} />
+      <FilterCountries filtered={filtered} onShow={setValue} />
     </div>
   )
 }
