@@ -2,7 +2,7 @@ const Persons = (props) => {
     return (
       <div>
         {props.persons.filter(person => person.name.toLowerCase().includes(props.search))
-                    .map(person => 
+                      .map(person => 
                             <li key={person.name}>{person.name} {person.number} 
                               <button onClick={() => props.onDelete(person.id)}>delete</button> 
                             </li>)}
