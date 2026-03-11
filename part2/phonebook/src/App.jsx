@@ -22,7 +22,7 @@ const App = () => {
       .getAll()
       .then(data => setPersons(data))
   }, [])
-  console.log('render', persons.length, 'persons')
+  console.log('render', persons.length, 'persons', persons)
 
   const handleNoteChange = (event) => {
     console.log(event.target.value)
