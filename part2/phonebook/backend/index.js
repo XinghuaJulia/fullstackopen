@@ -1,8 +1,13 @@
+require('dotenv').config()
 const express = require('express')
 const app = express()
 var morgan = require('morgan')
-
 const cors = require('cors')
+const Person = require('./models/person')
+const mongoose = require('mongoose')
+
+const url = process.env.MONGODB_URI
+
 
 app.use(cors())
 
@@ -56,7 +61,9 @@ app.get('/info', (request, response) => {
 })
 
 app.get('/api/persons', (request, response) => {
-  response.json(persons)
+  Person.find({}).then(persons => {
+    response.json(persons)
+  })
 })
 
 app.get('/api/persons/:id', (request, response) => {
