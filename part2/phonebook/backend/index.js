@@ -91,7 +91,7 @@ app.delete('/api/persons/:id', (request, response) => {
 })
 
 app.post('/api/persons', (request, response) => {
-  const person = request.body
+  const person = new Person(request.body)
 
   if (!person.name) {
     return response.status(400).json({ 
@@ -105,19 +105,19 @@ app.post('/api/persons', (request, response) => {
     })
   }
 
-  console.log(persons.filter(note => note.name === person.name))
+  person.save().then(result => {
+    console.log(`added ${person.name} number ${person.number} to phonebook!`)
+    mongoose.connection.close()
+  })
 
-  if (persons.filter(note => note.name === person.name).length !== 0) {
-    return response.status(400).json({ 
-      error: 'person alr in phonebook liao!' 
-    })
-  }
+  // console.log(persons.filter(note => note.name === person.name))
 
-  person.id = String(Math.floor(Math.random() * 10000))
+  // if (persons.filter(note => note.name === person.name).length !== 0) {
+  //   return response.status(400).json({ 
+  //     error: 'person alr in phonebook liao!' 
+  //   })
+  // }
 
-  persons = persons.concat(person)
-
-  console.log(persons)
   response.json(person)
 })
 
